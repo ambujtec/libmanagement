@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Book</title>
+    <style>
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+    <script>
+        function toggleAvailableDate() {
+            var availableRadio = document.getElementById("available");
+            var availableDateField = document.getElementById("available_date_field");
+            var availableCopiesField = document.getElementById("available_copies_field");
+            if (availableRadio.checked) {
+                availableDateField.style.display = "none";
+                availableCopiesField.style.display = "block";
+            } else {
+                availableDateField.style.display = "block";
+                availableCopiesField.style.display = "none";
+            }
+        }
+
+        function validateDate() {
+            var today = new Date();
+            var selectedDate = new Date(document.getElementById("first_book_return_date").value);
+            if (selectedDate < today) {
+                alert("Available date cannot be less than today.");
+                return false;
+            }
+            return true;
+        }
+
+        function validateAvailableCopies() {
+            var availableCopies = document.getElementById("available_copies").value;
+            if (availableCopies == 0) {
+                alert("Available copies cannot be 0.");
+                return false;
+            }
+            return true;
+        }
+
+        function validateForm() {
+            return validateDate() || validateAvailableCopies();
+        }
+    </script>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/queries">Queries</a>
+        <a href="/history">History</a>
+        <form class="log_out" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+    <h1>Update Book</h1>
+    <form method="post" action="{% url 'update_book' book.id %}" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ book.name }}" required><br><br>
+        
+        <label for="total">Total:</label>
+        <input type="number" id="total" name="total" value="{{ book.total }}" required><br><br>
+        
+        <label for="is_available">Availability:</label><br>
+        <input type="radio" id="available" name="is_available" value="true" onclick="toggleAvailableDate();" checked required>
+        <label for="available">Available</label><br>
+        <input type="radio" id="not_available" name="is_available" value="false" onclick="toggleAvailableDate();" required>
+        <label for="not_available">Not Available</label><br><br>
+
+
+        <div id="available_copies_field" style="display: block;">
+            <label for="available_copies">Available Copies:</label>
+            <input type="number" id="available_copies" name="available_copies" value="{{ book.available }}"><br><br>
+        </div>
+
+        <div id="available_date_field" style="display: none;">
+            <label for="first_book_return_date">Available Date:</label>
+            <input type="date" id="first_book_return_date" name="first_book_return_date" value="{{ book.first_book_return_date }}"><br><br>
+        </div>
+        
+        <input type="submit" value="Update Book">
+    </form>
+</body>
+</html>
+
+
+<!-- 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Update Book</title>
+    <script>
+        function toggleAvailableDate() {
+            var availableRadio = document.getElementById("available");
+            var availableDateField = document.getElementById("available_date_field");
+            var availableCopiesField = document.getElementById("available_copies_field");
+            if (availableRadio.checked) {
+                availableDateField.style.display = "none";
+                availableCopiesField.style.display = "block";
+                document.getElementById("first_book_return_date").setAttribute("required", false);
+                document.getElementById("available_copies").setAttribute("required", true);
+            } else {
+                availableDateField.style.display = "block";
+                availableCopiesField.style.display = "none";
+                document.getElementById("first_book_return_date").setAttribute("required", true);
+                document.getElementById("available_copies").setAttribute("required", false);
+            }
+        }
+
+        function validateDate() {
+            var today = new Date();
+            var selectedDate = new Date(document.getElementById("first_book_return_date").value);
+            if (selectedDate < today) {
+                alert("Available date cannot be less than today.");
+                return false;
+            }
+            return true;
+        }
+
+        function validateAvailableCopies() {
+            var availableCopies = document.getElementById("available_copies").value;
+            if (availableCopies == 0) {
+                alert("Available copies cannot be 0.");
+                return false;
+            }
+            return true;
+        }
+
+        function validateForm() {
+            return validateDate() && validateAvailableCopies();
+        }
+    </script>
+</head>
+<body>
+    <h1>Update Book</h1>
+    <form method="post" action="{% url 'update_book' book.id %}" onsubmit="return validateForm()">
+        {% csrf_token %}
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" value="{{ book.name }}" required><br><br>
+        
+        <label for="total">Total:</label>
+        <input type="number" id="total" name="total" value="{{ book.total }}" required><br><br>
+        
+        <label for="is_available">Availability:</label><br>
+        <input type="radio" id="available" name="is_available" value="true" onclick="toggleAvailableDate();" {% if book.is_available %}checked{% endif %} required>
+        <label for="available">Available</label><br>
+        <input type="radio" id="not_available" name="is_available" value="false" onclick="toggleAvailableDate();" {% if not book.is_available %}checked{% endif %} required>
+        <label for="not_available">Not Available</label><br><br>
+
+        <div id="available_copies_field" style="display: block;">
+            <label for="available_copies">Available Copies:</label>
+            <input type="number" id="available_copies" name="available_copies" value="{{ book.available }}"><br><br>
+        </div>
+
+        <div id="available_date_field" style="display: none;">
+            <label for="first_book_return_date">Available Date:</label>
+            <input type="date" id="first_book_return_date" name="first_book_return_date" value="{{ book.first_book_return_date }}"><br><br>
+        </div>
+        
+        <input type="submit" value="Update Book">
+    </form>
+</body>
+</html> -->

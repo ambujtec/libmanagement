@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Queries</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/history">History</a>
+        <form class="log_out" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+    <h1>Queries</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Student Name</th>
+                <th>Book Name</th>
+                <th>Request For</th>
+                <th>Approved</th>
+                <th>Reject</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for query in queries %}
+            <tr>
+                <td>{{ query.student_username }}</td>
+                <td>{{ query.book_name }}</td>
+                <td>{{ query.query_for }}</td>
+                <td><button onclick="handleQuery('approve',{{ query.query_for }}, {{query.student_username}}, {{ query.book_name }}, {{ query.id }})">Approved</button></td>
+                <td><button onclick="handleQuery('reject',{{ query.query_for }}, {{query.student_username}}, {{ query.book_name }}, {{ query.id }})">Reject</button></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <script>
+        function handleQuery(action, queryFor, studentName, bookName, queryId) {
+            const requestData = {
+                action: action,
+                queryFor: queryFor,
+                queryId: queryId,
+                studentName: studentName,
+                bookName: bookName
+            };
+            console.log(requestData)
+            // Send an AJAX request to the server
+            fetch('/handle_query/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(requestData)
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Failed to handle query');
+            })
+            .then(data => {
+                // Handle successful response
+                alert(data.message); 
+                console.log('Query handled successfully:', data.message);
+                location.reload()
+                // You can update the UI or perform any other action here
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+                alert('Failed to handle query');
+            });
+        }
+    </script>
+    
+</body>
+</html>

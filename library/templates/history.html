@@ -1,0 +1,67 @@
+<!-- student_history.html template -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Borrowed Books History</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #dddddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="/">Home</a>
+        <a href="/queries">Queries</a>
+        <form class="log_out" action="{% url 'logout' %}" method="post">
+            {% csrf_token %}
+            <button type="submit">Log Out</button>
+        </form>
+    </div>
+    <h1>Borrowed Books History</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Book Name</th>
+                <th>Borrowed Date</th>
+                <th>Return Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for book in borrowed_books %}
+                <tr>
+                    <td>{{ book.book_name }}</td>
+                    <td>{{ book.borrowed_date }}</td>
+                    <td>{{ book.return_date }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="3">No borrowed books history</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</body>
+</html>

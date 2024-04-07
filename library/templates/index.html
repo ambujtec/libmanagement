@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Library</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .navbar {
+            background-color: #333;
+            color: #fff;
+            padding: 10px 0;
+            text-align: center;
+        }
+        .navbar a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .books-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .book {
+            width: calc(33.33% - 20px);
+            background-color: #fff;
+            padding: 10px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .book-name {
+            font-weight: bold;
+        }
+        .book-details {
+            margin-top: 5px;
+            font-size: 0.9em;
+        }
+    </style>
+    <script>
+        function borrowBook(bookId, userId) {
+            // Send an AJAX request to the borrow_book endpoint with the bookId
+            fetch(`/borrow_book/${bookId}/${userId}`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',  // Include the CSRF token
+                    'Content-Type': 'application/json'  // Set the content type
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Failed to borrow book');
+            })
+            .then(data => {
+                // Handle successful response
+                alert(data.message);  // Display a success message
+                // Reload the page after 2 seconds
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            })
+            .catch(error => {
+                // Handle error
+                console.error('Error:', error);
+                alert('Failed to borrow book');
+            });
+        }
+    </script>
+    
+    
+</head>
+<body>
+    <div class="navbar">
+        {% if is_librarian %}
+            <a href="/add_book">Add Book</a>
+            <a href="/queries">Queries</a>
+            <a href="/all_history">History</a>
+            <p><form class="log_out" action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Log Out</button>
+            </form></p>
+        {% elif is_student %}        
+            <a href="/stud_books">My Books</a>
+            <a href="/stud_history">History</a>
+            <form class="log_out" action="{% url 'logout' %}" method="post">
+                {% csrf_token %}
+                <button type="submit">Log Out</button>
+            </form>
+        {% else %}
+            <a href="/login">Login</a>
+            <a href="/signup">Signup</a>
+        {% endif %}
+    </div>
+    <div class="container">
+        <h1>Library</h1>
+        <div class="books-container">
+            {% for book in books %}
+            <div class="book">
+                <div class="book-name">{{ book.name }}</div>
+                <div class="book-details">
+                    <p>Total Copies: <b>{{ book.total }}</b></p>
+                    <p>Available Copies: <b>{{ book.available }}</b></p>
+                    <p>Status: {% if book.lastest_return_date %}<b>
+                        {{ book.lastest_return_date }}</b>
+                        {% else %}
+                        <b>Available</b>
+                        {% endif %}
+                    </p>
+                    {% if is_librarian %}
+                    <p><a href="{% url 'update_book' book.id %}">Update Book</a></p>
+                    <p><a href="{% url 'delete_book' book.id %}">Delete Book</a></p>
+                    {% elif is_student %}
+                    <!-- Inside your template -->
+                    <p>
+                        <button onclick="borrowBook({{ book.id }},{{ userid }})">Borrow Book</button>
+                    </p>
+
+                    {% endif %}
+                    <!-- {% if borrow_message %}
+                        <p>{{ borrow_message }}</p>
+                    {% endif %} -->
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
