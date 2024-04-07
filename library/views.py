@@ -12,14 +12,6 @@ from datetime import datetime, timedelta
 customauth = CustomAuthBackend()
 
 
-# @login_required()
-# def index(request):
-#     books = Book.objects.all()
-#     # Pass the queryset of books to the template context
-#     context = {'books': books}
-#     # Render the index.html template with the book data
-#     return render(request, 'index.html', context)
-
 def index(request):
     books = Book.objects.all()
     is_librarian = False
@@ -92,7 +84,10 @@ def add_book(request):
     if request.method == 'POST':
         name = request.POST.get('name')
         total = int(request.POST.get('total'))
-        available = int(request.POST.get('available_copies'))
+        if request.POST.get('available_copies'):
+            available = int(request.POST.get('available_copies'))
+        else :
+            available = 0
         # first_book_return_date = request.POST.get('first_book_return_date')
         # copies = int(request.POST.get('copies'))
 
